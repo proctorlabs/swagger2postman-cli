@@ -1,0 +1,23 @@
+{
+  "name": "swagger2postman-cli",
+  "version": "1.0.0",
+  "description": "CLI got generating postman collections from Swagger v2 docs",
+  "main": "swagger-to-postman.js",
+  "dependencies": {
+    "swagger2-postman-generator": "^2.1.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/philproctor/swagger2postman-cli.git"
+  },
+  "author": "Phil Proctor",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/philproctor/swagger2postman-cli/issues"
+  },
+  "homepage": "https://github.com/philproctor/swagger2postman-cli#readme"
+}
