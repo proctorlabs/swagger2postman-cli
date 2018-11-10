@@ -57,28 +57,26 @@ var spec = JSON.parse(fs.readFileSync("/opt/" + fileToProcess))
 
 if (args.basepath !== undefined) {
     if (args.basepath == '') {
-        console.log('Deleted basepath')
         delete(spec.basePath)
     } else {
-        console.log('Set basepath')
         spec.basePath = '/{{' + args.basepath + '}}'
     }
 }
 
-console.log("Generating " + fileOutput + ".postman_collection")
+console.log("Generating " + fileOutput + ".postman_collection.json")
 Swagger2Postman
     .convertSwagger()
     .fromSpec(spec)
-    .toPostmanCollectionFile("/opt/" + fileOutput + ".postman_collection", {
+    .toPostmanCollectionFile("/opt/" + fileOutput + ".postman_collection.json", {
         globalHeaders: headers
     });
 
 for (var i = 0; i < envs.length; i++) {
-    console.log("Generating " + fileOutput + "." + envs[i].name + ".postman_environment")
+    console.log("Generating " + fileOutput + "." + envs[i].name + ".postman_environment.json")
     Swagger2Postman
         .convertSwagger()
         .fromSpec(spec)
-        .toPostmanEnvironmentFile("/opt/" + fileOutput + "." + envs[i].name + ".postman_environment", {
+        .toPostmanEnvironmentFile("/opt/" + fileOutput + "." + envs[i].name + ".postman_environment.json", {
             environment: envs[i]
         })
 }

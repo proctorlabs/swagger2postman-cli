@@ -1,3 +1,3 @@
 node_modules
-*.postman_collection
-*.postman_environment
+*.postman_collection.json
+*.postman_environment.json
