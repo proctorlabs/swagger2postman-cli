@@ -1,10 +1,11 @@
 {
   "name": "swagger2postman-cli",
   "version": "1.0.0",
-  "description": "CLI got generating postman collections from Swagger v2 docs",
+  "description": "CLI for generating postman collections from Swagger v2 docs",
   "main": "swagger-to-postman.js",
   "dependencies": {
     "swagger2-postman-generator": "^2.1.1",
+    "swagger2-postman2-converter": "0.0.3",
     "yargs": "^12.0.2"
   },
   "devDependencies": {},

@@ -2,6 +2,7 @@
 
 const args = require('yargs').argv;
 var Swagger2Postman = require("swagger2-postman-generator");
+var Swagger2Postman2 = require("swagger2-postman2-converter")
 var fs = require("fs");
 
 var fileToProcess = args.file
@@ -21,6 +22,7 @@ Flags:\n\
       --env.<name>.<var>          Generate output for environment <name>. Ensure <var> is set to this value\n\
       --header.<name>             Globally set this header to the value specified\n\
       --basepath                  Set the variable name to use for basepath instead of using the definition\n\
+      --pretty                    Pretty-print the JSON output\n\
 \n\
 e.g.\n\
 docker run --rm --user $UID:$UID -v $PWD:/opt philproctor/swagger2postman-cli \\\n\
@@ -34,6 +36,7 @@ var fileOutput = args.output ? args.output : args.file
 var headers = []
 var envMap = args.env
 var envs = []
+var spacing = args.pretty ? 2 : null
 
 for (var envName in envMap) {
     var vars = []
@@ -54,6 +57,7 @@ for (var headerName in args.header) {
 }
 
 var spec = JSON.parse(fs.readFileSync("/opt/" + fileToProcess))
+spec.host = '{{host}}'
 
 if (args.basepath !== undefined) {
     if (args.basepath == '') {
@@ -64,21 +68,23 @@ if (args.basepath !== undefined) {
 }
 
 console.log("Generating " + fileOutput + ".postman_collection.json")
-Swagger2Postman
-    .convertSwagger()
-    .fromSpec(spec)
-    .toPostmanCollectionFile("/opt/" + fileOutput + ".postman_collection.json", {
-        globalHeaders: headers
-    });
+var result = Swagger2Postman2.convert(spec)
+if (!result.status) {
+    console.log("Failed to convert Swagger!")
+    console.log(result.reason)
+    return
+}
+fs.writeFileSync("/opt/" + fileOutput + ".postman_collection.json", JSON.stringify(result.collection, null, spacing), 'utf8')
 
 for (var i = 0; i < envs.length; i++) {
     console.log("Generating " + fileOutput + "." + envs[i].name + ".postman_environment.json")
-    Swagger2Postman
+    var envToWrite = Swagger2Postman
         .convertSwagger()
         .fromSpec(spec)
-        .toPostmanEnvironmentFile("/opt/" + fileOutput + "." + envs[i].name + ".postman_environment.json", {
+        .toPostmanEnvironment({
             environment: envs[i]
         })
+    fs.writeFileSync("/opt/" + fileOutput + "." + envs[i].name + ".postman_environment.json", JSON.stringify(envToWrite, null, spacing), 'utf8')
 }
 
 console.log("Done!")
