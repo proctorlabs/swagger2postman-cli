@@ -1,4 +1,5 @@
 # swagger2postman-cli
+
 A Docker based utility for converting swagger (OpenAPI v2) documents to postman collections
 
 ``` bash

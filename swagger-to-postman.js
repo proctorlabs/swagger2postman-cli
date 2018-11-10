@@ -2,6 +2,7 @@
 
 const args = require('yargs').argv;
 var Swagger2Postman = require("swagger2-postman-generator");
+var fs = require("fs");
 
 var fileToProcess = args.file
 
@@ -19,6 +20,7 @@ Flags:\n\
       --output                    The base output name to use for generated collections\n\
       --env.<name>.<var>          Generate output for environment <name>. Ensure <var> is set to this value\n\
       --header.<name>             Globally set this header to the value specified\n\
+      --basepath                  Set the variable name to use for basepath instead of using the definition\n\
 \n\
 e.g.\n\
 docker run --rm --user $UID:$UID -v $PWD:/opt philproctor/swagger2postman-cli \\\n\
@@ -51,10 +53,22 @@ for (var headerName in args.header) {
     headers.push(headerName + ": " + args.header[headerName])
 }
 
+var spec = JSON.parse(fs.readFileSync("/opt/" + fileToProcess))
+
+if (args.basepath !== undefined) {
+    if (args.basepath == '') {
+        console.log('Deleted basepath')
+        delete(spec.basePath)
+    } else {
+        console.log('Set basepath')
+        spec.basePath = '/{{' + args.basepath + '}}'
+    }
+}
+
 console.log("Generating " + fileOutput + ".postman_collection")
 Swagger2Postman
     .convertSwagger()
-    .fromFile("/opt/" + fileToProcess)
+    .fromSpec(spec)
     .toPostmanCollectionFile("/opt/" + fileOutput + ".postman_collection", {
         globalHeaders: headers
     });
@@ -63,7 +77,7 @@ for (var i = 0; i < envs.length; i++) {
     console.log("Generating " + fileOutput + "." + envs[i].name + ".postman_environment")
     Swagger2Postman
         .convertSwagger()
-        .fromFile("/opt/" + fileToProcess)
+        .fromSpec(spec)
         .toPostmanEnvironmentFile("/opt/" + fileOutput + "." + envs[i].name + ".postman_environment", {
             environment: envs[i]
         })
