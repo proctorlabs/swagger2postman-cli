@@ -18,4 +18,4 @@ docker run --rm --user $UID:$UID -v $PWD/test:/opt swagger2postman-cli --env.tes
 sleep 2
 
 echo Test all features together
-docker run --rm --user $UID:$UID -v $PWD/test:/opt swagger2postman-cli --env.test.host=hostname '--env.Test 2.host=Some Value' --file=swagger.json '--header.Accept=application/json' '--header.Content-Type: application/json' --output=boomboom
+docker run --rm --user $UID:$UID -v $PWD/test:/opt swagger2postman-cli --env.test.host=hostname '--env.Test 2.host=Some Value' --file=swagger.json '--header.Accept=application/json' '--header.Content-Type: application/json' --output=outname

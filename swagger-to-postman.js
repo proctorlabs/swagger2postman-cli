@@ -19,6 +19,11 @@ Flags:\n\
       --output                    The base output name to use for generated collections\n\
       --env.<name>.<var>          Generate output for environment <name>. Ensure <var> is set to this value\n\
       --header.<name>             Globally set this header to the value specified\n\
+\n\
+e.g.\n\
+docker run --rm --user $UID:$UID -v $PWD:/opt philproctor/swagger2postman-cli \\\n\
+'--env.Dev Environment.host=localhost' --file=swagger.json '--header.Accept=application/json' \\\n\
+'--header.Content-Type: application/json' --output=petstore\n\
 ")
     return 0
 }
