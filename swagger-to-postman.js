@@ -3,6 +3,7 @@
 const args = require('yargs').argv;
 var Swagger2Postman = require("swagger2-postman-generator");
 var Swagger2Postman2 = require("swagger2-postman2-converter")
+var PostmanCollections = require("postman-collection")
 var fs = require("fs");
 
 var fileToProcess = args.file
@@ -23,6 +24,7 @@ Flags:\n\
       --header.<name>             Globally set this header to the value specified\n\
       --basepath                  Set the variable name to use for basepath instead of using the definition\n\
       --pretty                    Pretty-print the JSON output\n\
+      --prerequest.global         Global prerequest script to use in generated collection\n\
 \n\
 e.g.\n\
 docker run --rm --user $UID:$UID -v $PWD:/opt philproctor/swagger2postman-cli \\\n\
@@ -74,6 +76,15 @@ if (!result.status) {
     console.log(result.reason)
     return
 }
+
+if (args.prerequest && args.prerequest.global) {
+    result.collection.event.push(new PostmanCollections.Event({
+        listen: "prerequest",
+        script: fs.readFileSync("/opt/" + args.prerequest.global).toString()
+    }))
+}
+
+
 fs.writeFileSync("/opt/" + fileOutput + ".postman_collection.json", JSON.stringify(result.collection, null, spacing), 'utf8')
 
 for (var i = 0; i < envs.length; i++) {
