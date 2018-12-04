@@ -1,6 +1,8 @@
 #!/bin/bash
 docker build -t swagger2postman-cli .
 
+#docker run --rm --user $UID:$UID -v $PWD/test:/opt swagger2postman-cli --file=swagger.json --apikey=REDACTED --collection='REDACTED'
+
 echo Test usage printing
 docker run --rm swagger2postman-cli
 sleep 2

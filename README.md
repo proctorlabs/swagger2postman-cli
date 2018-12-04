@@ -2,7 +2,7 @@
 
 A Docker based utility for converting swagger (OpenAPI v2) documents to postman collections
 
-``` bash
+```bash
 swagger2postman-cli: Tool for converting Swagger v2 (OpenAPI v2) documents to postman collections.
 Intended to run with Docker!
 
@@ -17,6 +17,8 @@ Flags:
       --basepath                  Set the variable name to use for basepath instead of using the definition
       --pretty                    Pretty-print the JSON output
       --prerequest.global         Global prerequest script to use in generated collection
+      --apikey                    API Key to used for uploading collection to Postman servers. Requires --collection
+      --collection                Collection ID to update. Requires --apikey
 
 e.g.
 docker run --rm --user $UID:$UID -v $PWD:/opt philproctor/swagger2postman-cli \

@@ -5,12 +5,13 @@ var Swagger2Postman = require("swagger2-postman-generator");
 var Swagger2Postman2 = require("swagger2-postman2-converter")
 var PostmanCollections = require("postman-collection")
 var fs = require("fs");
+var http = require('https');
 
 var fileToProcess = args.file
 
 if (!fileToProcess) {
     console.log(
-"swagger2postman-cli: \
+        "swagger2postman-cli: \
 Tool for converting Swagger v2 (OpenAPI v2) documents to postman collections.\n\
 Intended to run with Docker!\n\
 \n\
@@ -25,6 +26,8 @@ Flags:\n\
       --basepath                  Set the variable name to use for basepath instead of using the definition\n\
       --pretty                    Pretty-print the JSON output\n\
       --prerequest.global         Global prerequest script to use in generated collection\n\
+      --apikey                    API Key to used for uploading collection to Postman servers. Requires --collection\n\
+      --collection                Collection ID to update. Requires --apikey\n\
 \n\
 e.g.\n\
 docker run --rm --user $UID:$UID -v $PWD:/opt philproctor/swagger2postman-cli \\\n\
@@ -39,6 +42,8 @@ var headers = []
 var envMap = args.env
 var envs = []
 var spacing = args.pretty ? 2 : null
+var apiKey = args.apikey
+var collection = args.collection
 
 for (var envName in envMap) {
     var vars = []
@@ -47,7 +52,7 @@ for (var envName in envMap) {
             key: varName,
             value: envMap[envName][varName]
         })
-    } 
+    }
     envs.push({
         name: envName,
         customVariables: vars
@@ -58,6 +63,7 @@ for (var headerName in args.header) {
     headers.push(headerName + ": " + args.header[headerName])
 }
 
+console.log('Reading swagger spec...')
 var spec = JSON.parse(fs.readFileSync("/opt/" + fileToProcess))
 spec.host = '{{host}}'
 
@@ -69,7 +75,7 @@ if (args.basepath !== undefined) {
     }
 }
 
-console.log("Generating " + fileOutput + ".postman_collection.json")
+console.log("Generating postman collection...")
 var result = Swagger2Postman2.convert(spec)
 if (!result.status) {
     console.log("Failed to convert Swagger!")
@@ -84,8 +90,30 @@ if (args.prerequest && args.prerequest.global) {
     }))
 }
 
-
-fs.writeFileSync("/opt/" + fileOutput + ".postman_collection.json", JSON.stringify(result.collection, null, spacing), 'utf8')
+if (apiKey && collection) {
+    console.log("Updating published collection...")
+    var postdata = JSON.stringify({
+        'collection': result.collection
+    }, null, spacing)
+    var postRequest = http.request('https://api.getpostman.com/collections/' + collection, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Api-Key': apiKey,
+            'Content-Length': Buffer.byteLength(postdata)
+        }
+    }, function (res) {
+        res.setEncoding('utf8');
+        res.on('data', function (chunk) {
+            console.log('Response: ' + chunk);
+        });
+    })
+    postRequest.write(postdata)
+    postRequest.end()
+} else {
+    console.log("Writing " + fileOutput + ".postman_collection.json")
+    fs.writeFileSync("/opt/" + fileOutput + ".postman_collection.json", JSON.stringify(result.collection, null, spacing), 'utf8')
+}
 
 for (var i = 0; i < envs.length; i++) {
     console.log("Generating " + fileOutput + "." + envs[i].name + ".postman_environment.json")
